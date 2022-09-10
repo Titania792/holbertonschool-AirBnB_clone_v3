@@ -1,19 +1,22 @@
 #!/usr/bin/python3
 """State"""
 
-from api.vi.views import app_views
+from flask import Flask, jsonify, request, abort
+from api.v1.views import app_views
 from models import storage
 from models.state import State
 
-@app_views.route("/states", methods=['GET'])
+
+@app_views.route("/states", methods=['GET'], strict_slashes=False)
 def get__task():
     """Show States"""
     states = []
     for state in storage.all('State').values():
-        states.append(storage.to_dict())
+        states.append(state.to_dict())
     return jsonify(states)
 
-@app_views.route("/states/<string:state_id>", methods=['GET'])
+
+@app_views.route("/states/<state_id>", methods=['GET'], strict_slashes=False)
 def get__task_id(state_id):
     """Get id of a task"""
     state_arr = storage.get('State', state_id)
@@ -21,7 +24,9 @@ def get__task_id(state_id):
         abort(404)
     return jsonify(state_arr.to_dict())
 
-@app_views.route("/states/<string:state_id>", methods=['DELETE'])
+
+@app_views.route("/states/<state_id>", methods=['DELETE'],
+                 strict_slashes=False)
 def get__task_delete(state_id):
     """Delete task"""
     state_arr = storage.get('State', state_id)
@@ -32,31 +37,32 @@ def get__task_delete(state_id):
         storage.save()
     return jsonify({}), 200
 
-@app_views.route("/states", methods=['POST'])
+
+@app_views.route("/states", methods=['POST'], strict_slashes=False)
 def set__task_POST():
     """Create a new object"""
-    if not request.json:
+    req = request.get_json()
+    if req is None:
         return jsonify({"Error": "Not a JSON"}), 400
-    if 'name' not in request.json:
+    elif 'name' not in req:
         return jsonify({"Error": "Missing name"}), 400
+    else:
+        state__post = State(**req)
+        state__post.save()
+        return jsonify(state__post.to_dict()), 201
 
-    state__post = State(**request.get_json())
-    state__post.save()
-    return jsonify(state__post.to_dict()), 201
 
-@app_views.route("/states/<string:state_id>", methods=['PUT'])
-def set__task_PUT():
+@app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=False)
+def set__task_PUT(state_id):
     """Create a new object"""
     state_arr = storage.get('State', state_id)
-    if not request.json:
+    req = request.get_json()
+    if req is None:
         return jsonify({"Error": "Not a JSON"}), 400
     if state_arr is None:
         abort(400)
-    for key, value in request.get_json().items():
-        setattr(state_arr, key, value)
-    storage.save()
-    return jsonify(state_arr.to_dict()), 200
-
-
-if __name__ == "__main__":
-    app.run(host=host, port=port, threaded=True)
+    else:
+        for key, value in req.items():
+            setattr(state_arr, key, value)
+        storage.save()
+        return jsonify(state_arr.to_dict()), 200
