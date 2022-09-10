@@ -55,7 +55,7 @@ def set__task_POST():
 
 @app_views.route("/states/<state_id>", methods=['PUT'], strict_slashes=False)
 def set__task_PUT(state_id):
-    """Create a new object"""
+    """ Updates a State object """
     state_arr = storage.get('State', state_id)
     req = request.get_json()
     if req is None:
@@ -63,7 +63,7 @@ def set__task_PUT(state_id):
     if state_arr is None:
         abort(400)
     else:
-        for key, value in req.items():
-            setattr(state_arr, key, value)
-        storage.save()
-        return jsonify(state_arr.to_dict()), 200
+        if 'name' in req:
+            storage.get(State, state_id).name = req['name']
+            storage.get(State, state_id).save()
+            return jsonify(state_arr.to_dict()), 200
