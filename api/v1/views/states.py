@@ -22,7 +22,8 @@ def get__task_id(state_id):
     state_arr = storage.get('State', state_id)
     if state_arr is None:
         abort(404)
-    return jsonify(state_arr.to_dict())
+    else:
+        return jsonify(state_arr.to_dict())
 
 
 @app_views.route("/states/<state_id>", methods=['DELETE'],
@@ -35,7 +36,7 @@ def get__task_delete(state_id):
     else:
         storage.delete(state_arr)
         storage.save()
-    return jsonify({}), 200
+        return jsonify({}), 200
 
 
 @app_views.route("/states", methods=['POST'], strict_slashes=False)
@@ -44,7 +45,7 @@ def set__task_POST():
     req = request.get_json()
     if req is None:
         return jsonify({"Error": "Not a JSON"}), 400
-    elif 'name' not in req:
+    elif 'name' not in req.keys():
         return jsonify({"Error": "Missing name"}), 400
     else:
         state__post = State(**req)
