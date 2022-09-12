@@ -13,11 +13,13 @@ from models.user import User
 def reviews(place_id):
     """ Retrieves the list of all review objects """
     if request.method == 'GET':
-        reviews = []
         if storage.get(Place, place_id) is None:
             abort(404)
-        for review in storage.get(Place, place_id).reviews:
-            reviews.append(review.to_dict())
+        all_reviews = storage.all(Review).values()
+        reviews = []
+        for review in all_reviews:
+            if review.place_id == place_id:
+                reviews.append(review.to_dict())
         return jsonify(reviews)
 
 
@@ -34,13 +36,12 @@ def review(review_id):
 @app_views.route('/reviews/<review_id>', methods=['DELETE'], strict_slashes=False)
 def delete_review(review_id):
     """ Deletes a review object """
+    if storage.get(Review, review_id) is None:
+        abort(404)
     if request.method == 'DELETE':
-        if storage.get(Review, review_id) is None:
-            abort(404)
-        else:
-            storage.delete(storage.get(Review, review_id))
-            storage.save()
-            return jsonify({}), 200
+        storage.delete(storage.get(Review, review_id))
+        storage.save()
+        return jsonify({}), 200
 
 
 @app_views.route('/places/<place_id>/reviews', methods=['POST'], strict_slashes=False)
