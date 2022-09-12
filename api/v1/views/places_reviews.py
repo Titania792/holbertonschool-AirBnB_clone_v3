@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-""" new view for review objects that handles all default RESTFul API actions """
+""" new view for review objects that handles all default
+RESTFul API actions """
 
 from flask import Flask, jsonify, request, abort
 from api.v1.views import app_views
@@ -9,7 +10,8 @@ from models.place import Place
 from models.user import User
 
 
-@app_views.route('/places/<place_id>/reviews', methods=['GET'], strict_slashes=False)
+@app_views.route('/places/<place_id>/reviews', methods=['GET'],
+                 strict_slashes=False)
 def reviews(place_id):
     """ Retrieves the list of all review objects """
     if request.method == 'GET':
@@ -33,7 +35,8 @@ def review(review_id):
             return jsonify(storage.get(Review, review_id).to_dict())
 
 
-@app_views.route('/reviews/<review_id>', methods=['DELETE'], strict_slashes=False)
+@app_views.route('/reviews/<review_id>', methods=['DELETE'],
+                 strict_slashes=False)
 def delete_review(review_id):
     """ Deletes a review object """
     if storage.get(Review, review_id) is None:
@@ -44,7 +47,8 @@ def delete_review(review_id):
         return jsonify({}), 200
 
 
-@app_views.route('/places/<place_id>/reviews', methods=['POST'], strict_slashes=False)
+@app_views.route('/places/<place_id>/reviews', methods=['POST'],
+                 strict_slashes=False)
 def new_review(place_id):
     """ Creates a review """
     if request.method == 'POST':
